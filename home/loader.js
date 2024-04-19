@@ -20,7 +20,7 @@ window.onload = function() {
     const legacyScript = document.createElement("script");
     legacyScript.noModule = true;
     legacyScript.crossOrigin = true
-    legacyScript.src = appUrl + 'index-legacy.js?v=' + version;
+    legacyScript.dataset.src = appUrl + 'index-legacy.js?v=' + version;
 
     document.head.appendChild(styles);
     document.head.appendChild(script);

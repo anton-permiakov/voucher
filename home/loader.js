@@ -22,8 +22,8 @@ window.onload = function() {
     legacyScript.crossOrigin = true
     legacyScript.dataset.src = appUrl + 'index-legacy.js?v=' + version;
 
-    document.head.appendChild(styles);
-    document.head.appendChild(script);
-    document.head.appendChild(legacyPolyfill);
-    document.head.appendChild(legacyScript);
+    document.body.appendChild(styles);
+    document.body.appendChild(script);
+    document.body.appendChild(legacyPolyfill);
+    document.body.appendChild(legacyScript);
 }

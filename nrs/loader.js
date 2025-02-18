@@ -51,15 +51,19 @@
     root.id = 'root';
     popup.appendChild(root);
 
-    window.openApp = function() {
+    window.openMtuApp = function() {
         document.getElementById('mtuPopup').style.display = 'block';
-        loadApp();
+        loadMtuApp();
     }
 
     function closeApp() {
-        document.getElementById('mtuPopup').style.display = 'none';
+        const mtuPopup = document.getElementById('mtuPopup');
         const mtuAppStyles = document.getElementById("mtuAppStyles");
         const mtuAppScript = document.getElementById("mtuAppScript");
+
+        if(mtuPopup) {
+            mtuPopup.remove()
+        }
         
         // First unmount the app
         if (window.AppLoader?.unmount) {
@@ -115,7 +119,7 @@
         });
     }
 
-    async function loadApp() {
+    async function loadMtuApp() {
         try {
             // Load CSS first and keep it loaded
             await loadStyles();

@@ -1,68 +1,56 @@
 (function initializeLoader() {
-    const appVersion = '1.0.0';
+    const appVersion = '1.3.4';
+    const isAppOutdated = !window.mtuNrsAppVersion || window.mtuNrsAppVersion !== appVersion;
+    let appUrl = 'https://anton-permiakov.github.io/voucher/nrs';
+    const appUrlFromQueryString = new URLSearchParams(window.location.search).get('mtuAppUrl');
+
+    if(appUrlFromQueryString) {
+        appUrl = appUrlFromQueryString;
+    }
+
     let appScript = null;
     let appStyles = null;
     let stylesLoaded = false;
 
-    const style = document.createElement('style');
-    style.textContent = `
-        .mtu-popup {
+    window.openMtuApp = function(appMountPointId) {
+
+        if(!appMountPointId) {
+            console.error('Param appMountPointId is not provided');
+            return;
+        }
+
+        const mountPoint = document.getElementById(appMountPointId);
+
+        if(!mountPoint) {
+            console.error(`Couldn't find element with id=${appMountPointId}`);
+            return;
+        }
+
+        mountPoint.style.cssText = `
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 1024px;
+            height: 768px;
             z-index: 1000;
-            display: none;
-        }
-        
-        .mtu-close-button {
-            display: none;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    `;
-    document.head.appendChild(style);
+            background: #FFF;
+            display: block;
+        `;
 
-    const merchantScreen = document.getElementById('merchant-screen');
-    if (!merchantScreen) {
-        console.error('Merchant screen container not found');
+        const root = document.createElement('div');
+        root.id = 'root';
+        mountPoint.appendChild(root);
+
+        loadMtuApp(appMountPointId);
     }
 
-    const popup = document.createElement('div');
-    popup.id = 'mtuPopup';
-    popup.className = 'mtu-popup';
-    merchantScreen.appendChild(popup);
-
-    const closeButton = document.createElement('button');
-    closeButton.className = 'mtu-close-button';
-    closeButton.id = 'closeMtuApp';
-    closeButton.onclick = closeApp;
-    closeButton.textContent = 'Close';
-    popup.appendChild(closeButton);
-
-    const root = document.createElement('div');
-    root.id = 'root';
-    popup.appendChild(root);
-
-    window.openMtuApp = function() {
-        document.getElementById('mtuPopup').style.display = 'block';
-        loadMtuApp();
-    }
-
-    function closeApp() {
-        const mtuPopup = document.getElementById('mtuPopup');
+    function closeApp(appMountPointId) {
+        const mountPoint = document.getElementById(appMountPointId);
         const mtuAppStyles = document.getElementById("mtuAppStyles");
         const mtuAppScript = document.getElementById("mtuAppScript");
 
-        if(mtuPopup) {
-            mtuPopup.remove()
+        if(mountPoint) {
+            mountPoint.style.display = 'none';
         }
         
         // First unmount the app
@@ -96,10 +84,6 @@
         if (rootElement) {
             rootElement.innerHTML = '';
         }
-
-        // Remove the AppLoader instance and initialization function
-        window.AppLoader = undefined;
-        window.initializeAppLoader = undefined;
     }
 
     async function loadStyles() {
@@ -108,7 +92,7 @@
         await new Promise((resolve, reject) => {
             appStyles = document.createElement('link');
             appStyles.rel = 'stylesheet';
-            appStyles.href = 'https://anton-permiakov.github.io/voucher/nrs/index.css';
+            appStyles.href = `${appUrl}/index.css?v=${appVersion}`;
             appStyles.id = 'mtuAppStyles';
             appStyles.onload = () => {
                 stylesLoaded = true;
@@ -119,8 +103,11 @@
         });
     }
 
-    async function loadMtuApp() {
+    async function loadMtuApp(appMountPointId) {
         try {
+            debugger;
+            document.removeEventListener('closeMtuApp', closeApp);
+
             // Load CSS first and keep it loaded
             await loadStyles();
 
@@ -130,19 +117,11 @@
                 appScript = null;
             }
 
-            // Only load React and ReactDOM if they're not already available
-            if (!window.React || !window.ReactDOM) {
-                await Promise.all([
-                    loadScript('https://unpkg.com/react@18/umd/react.development.js'),
-                    loadScript('https://unpkg.com/react-dom@18/umd/react-dom.development.js')
-                ]);
-            }
-
             // Then load our app
             await new Promise((resolve, reject) => {
                 appScript = document.createElement('script');
                 appScript.type = 'module';
-                appScript.src = `https://anton-permiakov.github.io/voucher/nrs/index.js?t=${Date.now()}`; // Cache busting
+                appScript.src = `${appUrl}/index.js?v=${appVersion}`;
                 appScript.id = "mtuAppScript";
                 appScript.onload = () => {
                     // Short delay to ensure module initialization
@@ -154,6 +133,7 @@
                                 window.AppLoader.render();
                                 // Set version after successful initialization
                                 window.mtuNrsAppVersion = appVersion;
+                                document.addEventListener('closeMtuApp', () => closeApp(appMountPointId));
                             }
                         }
                         resolve();

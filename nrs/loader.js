@@ -82,7 +82,7 @@
         // Clear the root element
         const rootElement = document.getElementById('root');
         if (rootElement) {
-            rootElement.innerHTML = '';
+            rootElement.remove();
         }
     }
 
@@ -105,7 +105,6 @@
 
     async function loadMtuApp(appMountPointId) {
         try {
-            debugger;
             document.removeEventListener('closeMtuApp', closeApp);
 
             // Load CSS first and keep it loaded
@@ -151,15 +150,5 @@
                 appScript = null;
             }
         }
-    }
-
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.body.appendChild(script);
-        });
     }
 })(); 

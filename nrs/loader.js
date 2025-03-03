@@ -1,5 +1,5 @@
 (function initializeLoader() {
-    const appVersion = '1.3.7';
+    const appVersion = '1.3.8';
     const isAppOutdated = !window.mtuNrsAppVersion || window.mtuNrsAppVersion !== appVersion;
     let appUrl = 'https://anton-permiakov.github.io/voucher/nrs';
     const appUrlFromQueryString = new URLSearchParams(window.location.search).get('mtuAppUrl');
